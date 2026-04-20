@@ -10,6 +10,8 @@ except ImportError:
 
 
 def press_once(hwnd: int, key: str) -> None:
+    """ 向指定窗口发送一次单次的按键按下和弹起消息 """
+
     if win32gui is None:
         logging.info("Mocking key press for non-Windows environment: %s", key)
         return
@@ -36,6 +38,8 @@ def press_once(hwnd: int, key: str) -> None:
 
 
 def click_at(hwnd: int, x: int, y: int) -> bool:
+    """ 映射坐标并执行物理鼠标左键点击 """
+
     if win32gui is None:
         logging.info("Mocking click at (%d, %d)", x, y)
         return True

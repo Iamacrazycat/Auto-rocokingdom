@@ -3,6 +3,8 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class AppConfig:
+    """ 全局配置项：包含窗口名、分辨率缩放、识别阈值及颜色参数 """
+
     # A visible window title keyword for your game client.
     window_title_keyword: str = "洛克王国：世界"
 
@@ -30,19 +32,11 @@ class AppConfig:
     release_misses: int = 2
     use_edge_match: bool = True
 
-    # Right-bottom ROI ratios for 2560x1600.
-    # These can be tuned without code changes.
-    roi_left_ratio: float = 0.77
-    roi_top_ratio: float = 0.72
-    roi_width_ratio: float = 0.22
-    roi_height_ratio: float = 0.27
-
-    # Smart Mode (Mode 3) settings
-    # Purple color bounds (HSV format in OpenCV: H:0-179, S:0-255, V:0-255)
-    purple_lower_hsv: tuple = (125, 40, 40)
-    purple_upper_hsv: tuple = (160, 255, 255)
-    # The ratio of purple pixels needed to be considered a "Normal Battle"
-    smart_mode_purple_ratio_threshold: float = 0.05
+    # Smart Mode (Mode 3) — HP 血条颜色判断
+    # BGR 格式的目标颜色
+    hp_valid_battle_bgr: tuple = (161, 63, 255)   # #ff3fa1 粉色 → 有效战斗
+    hp_escape_bgr: tuple = (21, 198, 115)          # #73c615 绿色 → 逃跑
+    hp_color_tolerance: float = 80.0               # 颜色欧氏距离容差
 
     # Templates.
     template_dir: str = "templates"

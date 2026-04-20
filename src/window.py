@@ -14,8 +14,19 @@ except ImportError:
 
 from config import CONFIG
 
+# 尝试启用高 DPI 感知，确保 GetClientRect 返回物理像素尺寸而不是逻辑缩放后的尺寸
+try:
+    ctypes.windll.shcore.SetProcessDpiAwareness(1) # PROCESS_SYSTEM_DPI_AWARE
+except Exception:
+    try:
+        ctypes.windll.user32.SetProcessDPIAware()
+    except Exception:
+        pass
+
 
 def find_window_by_keyword(keyword: str) -> Optional[int]:
+    """ 根据窗口标题关键词查找游戏的HWND句柄 """
+
     if win32gui is None:
         # Mock for non-Windows testing (e.g. testing logic on Linux)
         return 1
@@ -39,6 +50,8 @@ def find_window_by_keyword(keyword: str) -> Optional[int]:
 
 
 def get_client_rect_on_screen(hwnd: int) -> Tuple[int, int, int, int]:
+    """ 获取窗口客户区在屏幕上的物理坐标和尺寸 """
+
     if win32gui is None:
         # Mock for non-Windows testing
         return 0, 0, CONFIG.ref_width, CONFIG.ref_height
@@ -50,9 +63,7 @@ def get_client_rect_on_screen(hwnd: int) -> Tuple[int, int, int, int]:
 
 
 def capture_window_bgr(hwnd: int) -> np.ndarray:
-    """
-    通过 Windows API 直接抓取窗口内容，即使窗口被遮挡。
-    """
+    """ 抓图：通过 Windows API 获取窗口内容（支持后台/遮挡抓取） """
     if win32gui is None or win32ui is None:
         raise ImportError("需要安装 pywin32 库 (pip install pywin32)")
 

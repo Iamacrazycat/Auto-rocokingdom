@@ -3,6 +3,8 @@ import os
 import numpy as np
 
 def extract_templates():
+    """ 从预设截图中自动裁剪并保存常用的按钮识别模板 """
+
     img_path = "template.png"
     if not os.path.exists(img_path):
         print(f"Error: {img_path} not found.")
