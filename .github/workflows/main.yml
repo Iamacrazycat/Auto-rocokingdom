@@ -1,10 +1,12 @@
-name: Build with Nuitka
+name: Build and Auto Release
 
 on: [push, workflow_dispatch]
 
 jobs:
   build:
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -20,15 +22,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install nuitka zstandard 
           if (Test-Path requirements.txt) { pip install -r requirements.txt }
-          # 确保关键库存在
+          # 确保核心依赖库存在
           pip install opencv-python numpy pywin32
 
       - name: Build with Nuitka
         run: |
-          # 核心修正：
-          # 1. --assume-yes-for-downloads: 自动允许下载 Dependency Walker，解决 FATAL 报错
-          # 2. --standalone: 独立文件夹模式
-          # 3. --include-data-dir: 包含模板
           python -m nuitka --standalone `
             --assume-yes-for-downloads `
             --include-data-dir=templates=templates `
@@ -36,9 +34,25 @@ jobs:
             --output-dir=dist_folder `
             main.py
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - name: Generate Date Tag
+        id: date
+        run: |
+          $date = Get-Date -Format "yyyy.M.d"
+          echo "TAG_NAME=v$date" >> $env:GITHUB_ENV
+          echo "RELEASE_NAME=Release v$date" >> $env:GITHUB_ENV
+
+      - name: Package Output
+        run: |
+          Compress-Archive -Path dist_folder/main.dist/* -DestinationPath AutoRocoKingdom.zip
+
+      - name: Create or Update Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: Robot-Tool-Final
-          # Nuitka 产出的文件夹路径
-          path: dist_folder/main.dist/
+          tag_name: ${{ env.TAG_NAME }}
+          name: ${{ env.RELEASE_NAME }}
+          files: AutoRocoKingdom.zip
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
